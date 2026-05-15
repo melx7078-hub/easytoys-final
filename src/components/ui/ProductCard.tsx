@@ -63,7 +63,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
             {[1, 2, 3, 4, 5].map((star) => (
               <svg 
                 key={star}
-                className={cn("w-3 h-3", star <= Math.round(product.rating || 5) ? "fill-current text-amber-400" : "fill-slate-200 text-slate-200")} 
+                className={cn("w-3 h-3", star <= Math.round(Number(product.rating) || 5) ? "fill-current text-amber-400" : "fill-slate-200 text-slate-200")} 
                 viewBox="0 0 20 20" 
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -83,13 +83,13 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
         <div className="mt-auto pt-2 flex justify-between items-end gap-2">
           <div className="flex items-center gap-2">
             <span className="text-primary-600 font-bold font-mono">
-              ${product.price.toFixed(2)}
+              ${(Number(product.price) || 0).toFixed(2)}
             </span>
-            {product.originalPrice && (
+            {product.originalPrice ? (
               <span className="text-xs font-medium text-slate-400 line-through font-mono">
-                ${product.originalPrice.toFixed(2)}
+                ${(Number(product.originalPrice) || 0).toFixed(2)}
               </span>
-            )}
+            ) : null}
           </div>
           
           <button 
