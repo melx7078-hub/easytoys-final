@@ -1,38 +1,79 @@
-import * as cheerio from "cheerio";
-import fs from "fs";
+import fs from 'fs';
+import * as cheerio from 'cheerio';
 
-const html = fs.readFileSync("page.html", "utf-8");
+const html = fs.readFileSync('page.html', 'utf-8');
 const $ = cheerio.load(html);
 
-console.log("Analyzing page.html...");
-// Look for any image pointing to easytoys assets?
-$("img").each((i, el) => {
-  const src = $(el).attr("src");
-  if (i < 5) console.log("IMG:", src);
+const products = [];
+
+// EasyToys HTML: let's try to find elements with data attributes
+// often it's "data-product-sku" or class="product-item"
+// Let's just iterate ALL links and gather the ones that contain an image and some text
+$('a').each((i, el) => {
+    const $a = $(el);
+    const imgUrl = $a.find('img').first().attr('src') || $a.find('img').first().attr('data-src');
+    
+    // get all text inside this link, replace newlines
+    const linkText = $a.text().replace(/\s+/g, ' ').trim();
+    
+    // Look for price parts: a number followed by comma and 2 digits
+    const priceMatch = linkText.match(/(\d+),(\d{2})/g);
+    
+    // Let's also check if it contains product-like words
+    const hasProductWord = /(vibrador|dildo|plug|estimulador|masturbador|juguete|console)/i.test(linkText);
+    
+    if (imgUrl && imgUrl.startsWith('http') && priceMatch && hasProductWord && linkText.length > 20) {
+         
+         // extract name by splitting at the first price or PVR or rating "(XX)"
+         let name = linkText;
+         const splitMatch = linkText.match(/\(\d+\)|PVR|\d+,\d{2}/);
+         if (splitMatch && splitMatch.index) {
+             name = linkText.substring(0, splitMatch.index).trim();
+         }
+         
+         // Remove any leading "-XX%" discount tag
+         name = name.replace(/^-\d+%\s*/, '').trim();
+         
+         if (name && name.length > 5 && !products.find(p => p.name === name)) {
+             const amounts = priceMatch.map(p => parseFloat(p.replace(',', '.')));
+             let price = Math.min(...amounts);
+             let originalPrice = amounts.length > 1 ? Math.max(...amounts) : null;
+             
+             products.push({
+                 name,
+                 price,
+                 original_price: originalPrice,
+                 image: imgUrl,
+                 description: name,
+                 category: "Para mujeres",
+                 is_new: Math.random() > 0.8,
+                 rating: parseFloat((Math.random() * 1 + 4).toFixed(1)),
+                 review_count: Math.floor(Math.random() * 1000) + 10
+             });
+         }
+    }
 });
 
-// Check for structured data
-$("script[type='application/ld+json']").each((i, el) => {
-  try {
-    const data = JSON.parse($(el).html() || "{}");
-    if (data['@type'] === 'ItemList' || data['@type'] === 'Product') {
-      console.log("Structured Data Found:", data['@type']);
-      if (data.itemListElement) {
-         console.log("Items:", data.itemListElement.length);
-         console.log("Example:", data.itemListElement[0]);
-      }
-    }
-  } catch(e) {}
-});
+console.log(`Extracted ${products.length} products with simple string matching.`);
 
-// Check scripts for state
-$("script").each((i, el) => {
-  const t = $(el).html() || "";
-  if (t.includes('window.__INITIAL_STATE__')) {
-    const match = t.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/);
-    if (match) {
-        fs.writeFileSync("state.json", match[1]);
-        console.log("Saved state.json!");
-    }
-  }
-});
+if (products.length < 50) {
+   console.log("Will try picking ANY node with a name and image and price...");
+   const allCards = $('div').filter((i, el) => {
+       const t = $(el).text();
+       return t.includes(',99') && $(el).find('img').length > 0;
+   });
+   
+   console.log(`Found ${allCards.length} possible div cards. Need to parse tighter.`);
+}
+
+fs.writeFileSync('extracted-products.json', JSON.stringify(products, null, 2));
+
+if (products.length > 0) {
+    console.log("Sample:", products[0]);
+    console.log("List of names:", products.map(p => p.name));
+}
+
+
+
+
+
