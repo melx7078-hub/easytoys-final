@@ -48,55 +48,65 @@ async function run() {
 
     console.log(`Found ${products.length} products. Processing images...`);
 
-    for (const product of products) {
-        if (!product.image || !product.image.startsWith('http')) {
-            continue;
-        }
-        
-        console.log(`Processing product: ${product.name}`);
-        const url = product.image;
-        
-        try {
-            // Fetch image buffer
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            
-            const filename = `${product.id}.jpg`;
-            const mimeType = response.headers.get('content-type') || 'image/jpeg';
-            
-            // Upload to Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from('product-images')
-                .upload(filename, buffer, {
-                    contentType: mimeType,
-                    upsert: true
-                });
-                
-            if (uploadError) {
-                console.error(`Failed to upload ${filename}:`, uploadError);
-                continue;
+    const concurrencyLimit = 20;
+    let active = 0;
+    let index = 0;
+    let completed = 0;
+
+    await new Promise<void>((resolve) => {
+        const next = async () => {
+            if (index >= products.length) {
+                if (active === 0) resolve();
+                return;
             }
             
-            // Get public URL
-            const { data } = supabase.storage.from('product-images').getPublicUrl(filename);
-            const newUrl = data.publicUrl;
+            const product = products[index++];
+            active++;
             
-            // Update product in DB
-            const { error: updateError } = await supabase.from('products')
-                .update({ image: newUrl })
-                .eq('id', product.id);
-                
-            if (updateError) {
-                console.error(`Failed to update DB for ${product.id}:`, updateError);
-            } else {
-                console.log(`Successfully updated ${product.id} with new URL`);
+            if (!product.image || !product.image.startsWith('http') || product.image.includes('supabase.co')) {
+                completed++;
+                active--;
+                next();
+                return;
             }
             
-        } catch (err) {
-            console.error(`Error processing ${product.id}:`, err);
+            try {
+                const url = product.image;
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                
+                const filename = `${product.id}.jpg`;
+                const mimeType = response.headers.get('content-type') || 'image/jpeg';
+                
+                const { error: uploadError } = await supabase.storage
+                    .from('product-images')
+                    .upload(filename, buffer, {
+                        contentType: mimeType,
+                        upsert: true
+                    });
+                    
+                if (!uploadError) {
+                    const { data } = supabase.storage.from('product-images').getPublicUrl(filename);
+                    await supabase.from('products')
+                        .update({ image: data.publicUrl })
+                        .eq('id', product.id);
+                }
+            } catch (err) {
+                // ignore
+            }
+            
+            completed++;
+            if (completed % 100 === 0) console.log(`Processed ${completed}/${products.length} images...`);
+            
+            active--;
+            next();
+        };
+
+        for (let i = 0; i < concurrencyLimit; i++) {
+            next();
         }
-    }
+    });
     
     console.log("Done processing all products.");
 }

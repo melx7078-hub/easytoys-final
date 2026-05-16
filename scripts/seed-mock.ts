@@ -29,8 +29,8 @@ async function truncateAndSeed() {
       console.error("Could not read extracted-products.json", err);
   }
   
-  if (products.length > 50) {
-      products = products.slice(0, 50);
+  if (products.length > 2500) {
+      products = products.slice(0, 2500);
   }
   
   // ensure no duplicate names which might cause DB constraints error
@@ -43,13 +43,20 @@ async function truncateAndSeed() {
       }
   }
 
-  console.log(`Inserting ${uniqueProducts.length} scraped products to Supabase...`);
-  const { error } = await supabase.from('products').insert(uniqueProducts);
+  console.log(`Inserting ${uniqueProducts.length} scraped products to Supabase in batches...`);
   
-  if (error) {
-    console.error('Error inserting products:', error);
-  } else {
-    console.log(`Successfully inserted ${uniqueProducts.length} realistic EasyToys products.`);
+  const batchSize = 500;
+  let successCount = 0;
+  for (let i = 0; i < uniqueProducts.length; i += batchSize) {
+      const batch = uniqueProducts.slice(i, i + batchSize);
+      const { error } = await supabase.from('products').insert(batch);
+      
+      if (error) {
+        console.error(`Error inserting products batch ${i/batchSize}:`, error);
+      } else {
+        successCount += batch.length;
+        console.log(`Successfully inserted batch. Total: ${successCount}`);
+      }
   }
 }
 

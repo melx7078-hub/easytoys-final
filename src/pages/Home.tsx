@@ -9,6 +9,7 @@ export function Home() {
 
   useEffect(() => {
     async function load() {
+      // Get a lot of products
       const data = await getProducts();
       setProducts(data);
       setLoading(false);
@@ -16,96 +17,95 @@ export function Home() {
     load();
   }, []);
 
+  // Group products by category
+  const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean);
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Hero Section */}
-      <section className="h-auto md:h-[500px] bg-slate-900 relative overflow-hidden flex items-center px-4 md:px-12 py-16">
-        <div className="relative z-10 max-w-2xl mx-auto md:mx-0 text-center md:text-left">
-          <span className="text-primary-500 font-bold uppercase tracking-widest text-xs mb-4 block">
-            Spring Collection 2026
-          </span>
-          <h1 className="text-5xl md:text-7xl font-light text-white leading-tight mb-6">
-            Elevate Your <br className="hidden md:block" />
-            <span className="font-bold">Lifestyle.</span>
-          </h1>
-          <p className="text-slate-300 mb-10 leading-relaxed font-medium max-w-lg mx-auto md:mx-0">
-            Discover our curated selection of premium products designed to bring joy, style, and functionality to your everyday routine.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-            <button className="bg-primary-600 text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-primary-700 transition-colors">
-              Shop New Arrivals
-            </button>
-            <button className="bg-transparent border-2 border-white text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-colors">
-              View Bestsellers
-            </button>
+      <section className="bg-primary-600 relative overflow-hidden flex items-center px-4 md:px-12 py-16 text-white text-center md:text-left h-[400px]">
+        <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tighter">
+              EXPLORA EL PLACER
+            </h1>
+            <p className="text-primary-100 mb-8 font-medium max-w-lg text-lg">
+              Descubre miles de juguetes sexuales, lencería y artículos de farmacia. 
+              Disfruta de ofertas exclusivas hoy mismo.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+              <button className="bg-white text-primary-600 px-8 py-3 font-bold uppercase tracking-widest hover:bg-slate-100 transition-colors rounded-sm shadow-md">
+                Ver Favoritos
+              </button>
+              <button className="bg-transparent border-2 border-white text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-white/10 transition-colors rounded-sm">
+                Nuevas Llegadas
+              </button>
+            </div>
           </div>
-        </div>
-        {/* Geometric background element */}
-        <div className="hidden md:flex absolute right-0 top-0 w-1/2 h-full bg-slate-800 items-center justify-center pointer-events-none">
-          <div className="w-96 h-[30rem] border-8 border-slate-700 rotate-12 flex items-center justify-center">
-             <div className="text-slate-600 uppercase font-black text-6xl -rotate-12 tracking-tighter">AURA</div>
+          
+          <div className="hidden md:block w-72 h-72 rounded-full border-8 border-primary-500 bg-primary-700 items-center justify-center relative translate-x-12 opacity-80">
+            <div className="absolute inset-0 flex items-center justify-center text-4xl font-black opacity-50 rotate-12">+2000</div>
           </div>
         </div>
       </section>
 
-      {/* Featured Products Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-8 py-16 sm:py-24 flex-1 w-full">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-light text-slate-900 tracking-tight">Featured Picks</h2>
-            <p className="mt-2 text-sm uppercase tracking-widest font-bold text-slate-400">Hand-selected items we know you'll love.</p>
-          </div>
-        </div>
-
+      {/* Categories loop */}
+      <div className="flex-1 w-full pb-20">
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="bg-slate-200 h-64 border border-slate-300"></div>
-            ))}
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-pulse">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="bg-slate-200 h-64 border border-slate-300 rounded"></div>
+              ))}
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-fr">
-            {products.map((product, index) => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                featured={index === 0} // Make the first item larger
-              />
-            ))}
-          </div>
+          categories.map(category => {
+            const categoryProducts = products.filter(p => p.category === category).slice(0, 4);
+            if (categoryProducts.length === 0) return null;
+            
+            return (
+              <section key={category} className="max-w-7xl mx-auto px-4 sm:px-8 pt-16">
+                <div className="flex items-center justify-between border-b-2 border-slate-200 pb-4 mb-8">
+                  <h2 className="text-2xl font-bold text-slate-800 uppercase tracking-tighter">
+                    {category}
+                  </h2>
+                  <button className="text-sm font-bold text-primary-600 hover:text-primary-700 uppercase tracking-widest flex items-center gap-2">
+                    Ver todos
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-fr">
+                  {categoryProducts.map(product => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })
         )}
-      </section>
+      </div>
       
-      {/* Footer Banner */}
-      <section className="bg-slate-900 py-16 border-t-[12px] border-primary-600 mt-auto">
+      {/* Newsletter */}
+      <section className="bg-slate-900 py-16 mt-auto">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-light text-white mb-4 uppercase tracking-widest">Ready to upgrade?</h2>
-          <p className="text-slate-400 mb-8 max-w-xl mx-auto text-sm uppercase tracking-widest">Join our newsletter to get 15% off your first order.</p>
+          <h2 className="text-2xl font-bold text-white mb-4 uppercase tracking-widest">¿Quieres un descuento?</h2>
+          <p className="text-slate-400 mb-8 max-w-xl mx-auto text-sm">Apúntate a nuestra newsletter y llévate un 15% de descuento en tu primer pedido.</p>
           <div className="flex flex-col sm:flex-row gap-0 max-w-lg mx-auto">
             <input 
               type="email" 
-              placeholder="ENTER YOUR EMAIL" 
-              className="flex-1 px-5 py-4 bg-slate-800 border-none text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-primary-500 text-xs font-bold tracking-widest uppercase"
+              placeholder="E-MAIL" 
+              className="flex-1 px-5 py-4 bg-slate-800 border-none text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-bold tracking-widest"
             />
-            <button className="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold uppercase tracking-widest text-xs transition-colors">
-              Subscribe
+            <button className="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold uppercase tracking-widest text-sm transition-colors mt-2 sm:mt-0 rounded-sm sm:rounded-none">
+              Suscribir
             </button>
           </div>
         </div>
       </section>
-      
-      {/* System Status Footer */}
-      <footer className="h-12 bg-white border-t border-slate-200 flex items-center px-4 md:px-8 justify-between text-[10px] text-slate-400 uppercase tracking-widest overflow-hidden">
-        <div className="hidden md:flex gap-8">
-          <span>Shipping Worldwide</span>
-          <span>Free returns over $50</span>
-          <span>Secure checkout</span>
-        </div>
-        <div className="flex gap-4 items-center bg-slate-900 text-slate-300 px-4 h-full ml-auto md:ml-0 md:-mr-8">
-          <span className="text-emerald-400 font-mono">SYS_STATUS:</span>
-          <span className="font-mono">DB CONNECTED // PRODUCTS_SYNCED: 50</span>
-        </div>
-      </footer>
     </div>
   );
 }
