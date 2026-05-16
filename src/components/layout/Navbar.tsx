@@ -42,24 +42,29 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex gap-6 text-sm font-bold text-slate-700">
-            <a href="#" className="text-primary-600 border-b-2 border-primary-600 pb-1">Inicio</a>
-            <a href="#" className="hover:text-primary-600 transition-colors pb-1">Juguetes</a>
-            <a href="#" className="hover:text-primary-600 transition-colors pb-1">Lencería</a>
-            <a href="#" className="hover:text-primary-600 transition-colors pb-1">BDSM</a>
-            <a href="#" className="hover:text-primary-600 transition-colors pb-1 text-red-500">Ofertas</a>
+            <a href="/" className="hover:text-primary-600 transition-colors pb-1">Inicio</a>
+            <a href="/catalog?category=Juguetes sexuales" className="hover:text-primary-600 transition-colors pb-1">Juguetes</a>
+            <a href="/catalog?category=Lencería y ropa" className="hover:text-primary-600 transition-colors pb-1">Lencería</a>
+            <a href="/catalog?category=BDSM" className="hover:text-primary-600 transition-colors pb-1">BDSM</a>
+            <a href="/catalog?category=Farmacia" className="hover:text-primary-600 transition-colors pb-1">Farmacia</a>
           </nav>
         </div>
 
         {/* Utilities */}
         <div className="flex items-center gap-4 md:gap-6">
-          <div className="relative hidden md:block group">
+          <form 
+            action="/catalog" 
+            method="get" 
+            className="relative hidden md:block group"
+          >
             <input 
               type="text" 
+              name="q"
               placeholder="¿Qué estás buscando?" 
               className="bg-slate-100 border border-transparent rounded-full px-5 py-2 pl-10 text-sm w-64 focus:bg-white focus:border-primary-300 focus:ring-2 focus:ring-primary-100 focus:outline-none placeholder:text-slate-400 font-medium transition-all" 
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-primary-500" />
-          </div>
+          </form>
           <div className="flex gap-4 items-center text-primary-800">
             <button className="hover:text-primary-500 transition-colors hidden sm:block">
               <Search className="w-6 h-6 md:hidden" />

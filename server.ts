@@ -31,6 +31,18 @@ async function startServer() {
   // API Routes (Backend logic)
   // ---------------------------------------------------------
   
+  const ADMIN_TOKEN = "eya_secret_admin_token_2026";
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "easytoys2026";
+
+  app.post("/api/admin/login", (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+      res.json({ success: true, token: ADMIN_TOKEN });
+    } else {
+      res.status(401).json({ success: false, error: "Invalid password" });
+    }
+  });
+
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
   });
@@ -41,7 +53,7 @@ async function startServer() {
       const sb = getSupabaseAdmin();
       // Example query: Fetching from a 'products' table. 
       // Adjust this according to your actual DB schema.
-      const { data, error } = await sb.from("products").select("*").limit(100);
+      const { data, error } = await sb.from("products").select("*").limit(3000);
       
       if (error) throw error;
       res.json({ success: true, data });

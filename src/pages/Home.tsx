@@ -61,7 +61,7 @@ export function Home() {
           </div>
         ) : (
           categories.map(category => {
-            const categoryProducts = products.filter(p => p.category === category).slice(0, 4);
+            const categoryProducts = products.filter(p => p.category === category).slice(0, 8);
             if (categoryProducts.length === 0) return null;
             
             return (
@@ -70,10 +70,10 @@ export function Home() {
                   <h2 className="text-2xl font-bold text-slate-800 uppercase tracking-tighter">
                     {category}
                   </h2>
-                  <button className="text-sm font-bold text-primary-600 hover:text-primary-700 uppercase tracking-widest flex items-center gap-2">
+                  <a href={`/catalog?category=${encodeURIComponent(category)}`} className="text-sm font-bold text-primary-600 hover:text-primary-700 uppercase tracking-widest flex items-center gap-2">
                     Ver todos
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
-                  </button>
+                  </a>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-fr">
                   {categoryProducts.map(product => (
@@ -90,17 +90,17 @@ export function Home() {
       </div>
       
       {/* Newsletter */}
-      <section className="bg-slate-900 py-16 mt-auto">
+      <section className="bg-primary-50 py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4 uppercase tracking-widest">¿Quieres un descuento?</h2>
-          <p className="text-slate-400 mb-8 max-w-xl mx-auto text-sm">Apúntate a nuestra newsletter y llévate un 15% de descuento en tu primer pedido.</p>
-          <div className="flex flex-col sm:flex-row gap-0 max-w-lg mx-auto">
+          <h2 className="text-2xl font-black text-primary-900 mb-4 tracking-tighter">¿Quieres un descuento?</h2>
+          <p className="text-primary-700 mb-8 max-w-xl mx-auto font-medium">Apúntate a nuestra newsletter y llévate un 15% de descuento en tu primer pedido.</p>
+          <div className="flex flex-col sm:flex-row gap-0 max-w-lg mx-auto shadow-xl rounded-full overflow-hidden">
             <input 
               type="email" 
               placeholder="E-MAIL" 
-              className="flex-1 px-5 py-4 bg-slate-800 border-none text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-bold tracking-widest"
+              className="flex-1 px-6 py-4 bg-white border-none text-slate-800 placeholder-slate-400 focus:outline-none font-medium"
             />
-            <button className="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold uppercase tracking-widest text-sm transition-colors mt-2 sm:mt-0 rounded-sm sm:rounded-none">
+            <button className="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold uppercase tracking-widest text-sm transition-colors">
               Suscribir
             </button>
           </div>
